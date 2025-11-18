@@ -1,3 +1,17 @@
+<?php
+
+require_once 'db.php';
+
+$sql = "
+    SELECT *
+    FROM Positions
+";
+
+$posResults = $connection->query($sql);
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,83 +41,65 @@
                 <h3 class="">Election Results</h3>
                 <hr>
                 <span class="text1">Here are the election results.</span>
-                <form action="" class="pt-10 pb-10">
-                    <div class="border rounded-5 p-5 mb-6">
-                        <div class="table table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>President</th>
-                                        <th>Total Votes</th>
-                                        <th>Voting %</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Boom Boom Marcos</td>
-                                        <td>138</td>
-                                        <td>40%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Freakseid Skywalker</td>
-                                        <td>244</td>
-                                        <td>60%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="border rounded-5 p-5 mb-6">
-                        <div class="table table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Vice-president</th>
-                                        <th>Total Votes</th>
-                                        <th>Voting %</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Boom Boom Marcos</td>
-                                        <td>138</td>
-                                        <td>40%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Freakseid Skywalker</td>
-                                        <td>244</td>
-                                        <td>60%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="border rounded-5 p-5 mb-6">
-                        <div class="table table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Senator</th>
-                                        <th>Total Votes</th>
-                                        <th>Voting %</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Boom Boom Marcos</td>
-                                        <td>138</td>
-                                        <td>40%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Freakseid Skywalker</td>
-                                        <td>244</td>
-                                        <td>60%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </form>
+                <?php 
+                
+                    while($row = $posResults->fetch_assoc()) {
+
+                        $sql = "
+                            SELECT *, (
+                                SELECT COUNT(*)
+                                FROM Votes vv
+                                JOIN Candidates cc ON vv.candID = cc.candID
+                                WHERE cc.candID = c.candID
+                            ) AS 'totalVotesPerCand',
+                            (
+                                SELECT COUNT(*)
+                                FROM Votes vv
+                                JOIN Candidates cc ON vv.candID = cc.candID
+                            ) AS 'totalVotesPerPos'
+                            FROM Candidates c
+                            JOIN Positions p ON c.posID = p.posID
+                            WHERE p.posID = $row[posID]
+                        ";
+                        $candResults = $connection->query($sql);
+
+
+                        echo "
+                            <div class='border rounded-5 p-5 mb-6'>
+                                <div class='table table-responsive'>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>$row[posName]</th>
+                                                <th>Total Votes</th>
+                                                <th>Voting %</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        ";
+
+                        while($candRow = $candResults->fetch_assoc()) {
+                            $percent = $candRow['totalVotesPerCand'] / $candRow['totalVotesPerPos'] * 100;
+
+                            echo "
+                                        <tr>
+                                            <td>$candRow[candFName] $candRow[candMName] $candRow[candLName]</td>
+                                            <td>$candRow[totalVotesPerCand]</td>
+                                            <td>$percent%</td>
+                                        </tr>
+                            ";
+                        }
+
+
+                        echo"
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ";
+                    }
+                
+                ?>
             </div>
         </div>
     </div>
