@@ -2,6 +2,37 @@
 
 require_once '../../db.php';
 
+$search = '';
+$message = '';
+
+$sql = "
+    SELECT *
+    FROM Positions
+";
+
+$result = $connection->query($sql);
+
+if (!$result) {
+    die("Invalid query");
+}
+
+// search
+if($_SERVER['REQUEST_METHOD'] == 'GET') {
+    $search = $_GET['search'] ?? '';
+
+    if(!empty($search)) {
+        $sql = "
+            SELECT *
+            FROM Positions
+            WHERE posID LIKE '%$search%'
+                OR posName LIKE '%$search%'
+                OR posStat LIKE '%$search%'
+        ";
+
+        $result = $connection->query($sql);
+    }    
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -24,6 +55,15 @@ require_once '../../db.php';
     <div class="container">
         <div class="card bg-base-100 w-half">
             <a href="../dashboard.php"><- Back to Dashboard</a>
+            <?php
+                if(!empty($message)) {
+                    echo "
+                        <div class='alert'>
+                            <span>$message</span>
+                        </div>
+                    ";
+                }
+            ?>
             <h3>Positions Management</h3>
             <form action="" class="pb-10">
                 <input type="text" class="form-control" name="search" id="search">
@@ -42,21 +82,28 @@ require_once '../../db.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>President</td>
-                            <td>1</td>
-                            <td>Active</td>
-                            <td>
-                                <div class="flex flex-row">
-                                    <button class="btn text-xs action-btn hover-purple"
-                                        onclick="window.location.href='edit.php?posID=1'"
-                                        >Edit</button>
-                                    <button class="btn text-xs action-btn hover-red">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                        </tr>
+                        <?php 
+                            while($row = $result->fetch_assoc()) {
+                                echo "
+                                    <tr>
+                                    <td>$row[posID]</td>
+                                    <td>$row[posName]</td>
+                                    <td>$row[numOfPositions]</td>
+                                    <td>$row[posStat]</td>
+                                    <td>
+                                        <div class='flex flex-row'>
+                                            <button class='btn text-xs action-btn hover-purple'
+                                                onclick='window.location.href=`edit.php?posID=$row[posID]`'
+                                                >Edit</button>
+                                            <button class='btn text-xs action-btn hover-red'
+                                                onclick='window.location.href=`delete.php?posID=$row[posID]`'
+                                                >Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                ";
+                            }
+                        ?>
                     </tbody>
                 </table>
             </div>

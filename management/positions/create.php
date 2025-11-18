@@ -2,6 +2,52 @@
 
 require_once '../../db.php';
 
+$posName = '';
+$numOfPositions = '';
+$posStat = '';
+
+$message = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $posName = $_POST['posName'] ?? '';
+    $numOfPositions = $_POST['numOfPositions'] ?? '';
+    $posStat = $_POST['posStat'] ?? '';
+
+    do {
+        // All fields required
+        if (empty($posName) || 
+            empty($numOfPositions) || 
+            empty($posStat)) 
+        {
+            $message = 'All fields are required';
+            break;
+        }
+
+        $sql = "
+            INSERT INTO Positions (posName, numOfPositions, posStat)
+            VALUES (
+                '$posName',
+                '$numOfPositions',
+                '$posStat'
+            )
+        ";
+
+        $result = $connection->query($sql);
+
+        if (!$result) {
+            $message = 'Invalid query.';
+            break;
+        }
+
+        $message = "Successfully created position!";
+
+        // Reset
+        $posName = '';
+        $numOfPositions = '';
+        $posStat = '';
+    } while(false);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -24,21 +70,30 @@ require_once '../../db.php';
     <div class="container">
         <div class="card bg-base-100 w-half">
             <a href="view.php"><- Back to Management</a>
+            <?php
+                if(!empty($message)) {
+                    echo "
+                        <div class='alert'>
+                            <span>$message</span>
+                        </div>
+                    ";
+                }
+            ?>
             <h3>Create Position</h3>
             <hr>
-            <form action="" class="pt-10 pb-10">
+            <form method="POST" class="pt-10 pb-10">
                 <div class="form-group">
                     <label for="posName">Position Name</label>
                     <input type="text" class="form-control" name="posName" id="posName">
                 </div>
                 <div class="form-group">
                     <label for="numOfPositions">Number of Positions</label>
-                    <input type="text" class="form-control" name="numOfPositions" id="numOfPositions">
+                    <input type="number" class="form-control" name="numOfPositions" id="numOfPositions">
                 </div>
                 <div class="form-group">
                     <label for="posStat">Position Status</label>
                     <select name="posStat" id="posStat" class="form-control">
-                        <option value="Active">Active</option>
+                        <option value="Active" selected>Active</option>
                         <option value="Inactive">Inactive</option>
                     </select>
                 </div>

@@ -2,6 +2,37 @@
 
 require_once '../../db.php';
 
+$search = '';
+
+$sql = "
+    SELECT *
+    FROM Voters
+";
+
+$result = $connection->query($sql);
+
+if (!$result) {
+    die("Invalid query");
+}
+
+// search
+if($_SERVER['REQUEST_METHOD'] == 'GET') {
+    $search = $_GET['search'] ?? '';
+
+    if(!empty($search)) {
+        $sql = "
+            SELECT *
+            FROM Voters
+            WHERE voterID LIKE '%$search%'
+                OR voterFName LIKE '%$search%'
+                OR voterMName LIKE '%$search%'
+                OR voterLName LIKE '%$search%'
+        ";
+
+        $result = $connection->query($sql);
+    }    
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -25,8 +56,10 @@ require_once '../../db.php';
         <div class="card bg-base-100 w-half">
             <a href="../dashboard.php"><- Back to Dashboard</a>
             <h3>Voters Management</h3>
-            <form action="" class="pb-10">
-                <input type="text" class="form-control" name="search" id="search">
+            <form method="GET" class="pb-10">
+                <input type="text" class="form-control" name="search" id="search"
+                    value="<?php echo $search; ?>"
+                >
                 <button class="btn mt-6">Search</button>
             </form>
             <hr>
@@ -44,23 +77,31 @@ require_once '../../db.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Ram Railey</td>
-                            <td>Baratas</td>
-                            <td>Alin</td>
-                            <td>Active</td>
-                            <td>No</td>
-                            <td>
-                                <div class="flex flex-row">
-                                    <button class="btn text-xs action-btn hover-purple"
-                                        onclick="window.location.href='edit.php?voterID=1'"
-                                        >Edit</button>
-                                    <button class="btn text-xs action-btn hover-red">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                        </tr>
+                        <?php 
+                            while($row = $result->fetch_assoc()) {
+                                $isVoted = $row['voted'] ? "Yes" : "No";
+                                echo "
+                                    <tr>
+                                    <td>$row[voterID]</td>
+                                    <td>$row[voterFName]</td>
+                                    <td>$row[voterMName]</td>
+                                    <td>$row[voterLName]</td>
+                                    <td>$row[voterStat]</td>
+                                    <td>$isVoted</td>
+                                    <td>
+                                        <div class='flex flex-row'>
+                                            <button class='btn text-xs action-btn hover-purple'
+                                                onclick='window.location.href=`edit.php?voterID=$row[voterID]`'
+                                                >Edit</button>
+                                            <button class='btn text-xs action-btn hover-red'
+                                                onclick='window.location.href=`delete.php?voterID=$row[voterID]`'
+                                                >Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                ";
+                            }
+                        ?>
                     </tbody>
                 </table>
             </div>

@@ -1,3 +1,23 @@
+<?php
+
+require_once '../db.php';
+
+$params_id = $_GET['voterID'] ?? '';
+if (empty($params_id)) {
+    die('Voter not logged in');
+}
+
+$sql = "
+    SELECT *
+    FROM Positions
+";
+
+$posResults = $connection->query($sql);
+
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,73 +46,18 @@
                 <a href="../index.php"><- Logout</a>
                 <h3 class="">Voting Paper</h3>
                 <hr>
-                <span class="text1">Vote for your candidate. Remember to be patient.</span>
-                <form action="" class="pt-10 pb-10">
-                    <div class="border rounded-5 p-5 mb-6">
-                        <label>President</label>
-                        <div class="form-group">
-                            <select name="candID" id="candID" class="form-control">
-                                <option value="1">Boom Boom Marcos</option>
-                                <option value="2">Freakseid Skywalker</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="border rounded-5 p-5 mb-6">
-                        <label>Vice-president</label>
-                        <div class="form-group">
-                            <select name="candID" id="candID" class="form-control">
-                                <option value="1">Boom Boom Marcos</option>
-                                <option value="2">Freakseid Skywalker</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="border rounded-5 p-5 mb-6">
-                        <label>Senator</label>
-                        <div class="form-group">
-                            <select name="candID" id="candID" class="form-control">
-                                <option value="1">Boom Boom Marcos</option>
-                                <option value="2">Freakseid Skywalker</option>
-                                <option value="3">Boom Boom Marcos</option>
-                                <option value="4">Freakseid Skywalker</option>
-                                <option value="5">Boom Boom Marcos</option>
-                                <option value="6">Freakseid Skywalker</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <select name="candID" id="candID" class="form-control">
-                                <option value="1">Boom Boom Marcos</option>
-                                <option value="2">Freakseid Skywalker</option>
-                                <option value="3">Boom Boom Marcos</option>
-                                <option value="4">Freakseid Skywalker</option>
-                                <option value="5">Boom Boom Marcos</option>
-                                <option value="6">Freakseid Skywalker</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <select name="candID" id="candID" class="form-control">
-                                <option value="1">Boom Boom Marcos</option>
-                                <option value="2">Freakseid Skywalker</option>
-                                <option value="3">Boom Boom Marcos</option>
-                                <option value="4">Freakseid Skywalker</option>
-                                <option value="5">Boom Boom Marcos</option>
-                                <option value="6">Freakseid Skywalker</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <select name="candID" id="candID" class="form-control">
-                                <option value="1">Boom Boom Marcos</option>
-                                <option value="2">Freakseid Skywalker</option>
-                                <option value="3">Boom Boom Marcos</option>
-                                <option value="4">Freakseid Skywalker</option>
-                                <option value="5">Boom Boom Marcos</option>
-                                <option value="6">Freakseid Skywalker</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <input type="text" class="display-none" name="voted" id="voted" value="false">
-                    <button class="btn float-right">Submit</button>
-                </form>
+                <span class="text1">Vote for your candidate. Navigate to each position and vote wisely.</span>
+                <ul>
+                    <?php 
+                        while($row = $posResults->fetch_assoc()) {
+                            echo "
+                                <li>
+                                    <a href='vote.php?posID=$row[posID]'>$row[posName] ($row[numOfPositions])</a>
+                                </li>
+                            ";
+                        }
+                    ?>
+                </ul>
             </div>
         </div>
     </div>

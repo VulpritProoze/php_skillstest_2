@@ -2,6 +2,38 @@
 
 require_once '../../db.php';
 
+$search = '';
+$message = '';
+
+$sql = "
+    SELECT *
+    FROM Candidates
+";
+
+$result = $connection->query($sql);
+
+if (!$result) {
+    die("Invalid query");
+}
+
+// search
+if($_SERVER['REQUEST_METHOD'] == 'GET') {
+    $search = $_GET['search'] ?? '';
+
+    if(!empty($search)) {
+        $sql = "
+            SELECT *
+            FROM Candidates
+            WHERE candID LIKE '%$search%'
+                OR candFName LIKE '%$search%'
+                OR candMName LIKE '%$search%'
+                OR candLName LIKE '%$search%'
+        ";
+
+        $result = $connection->query($sql);
+    }    
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -24,6 +56,15 @@ require_once '../../db.php';
     <div class="container">
         <div class="card bg-base-100 w-half">
             <a href="../dashboard.php"><- Back to Dashboard</a>
+            <?php
+                if(!empty($message)) {
+                    echo "
+                        <div class='alert'>
+                            <span>$message</span>
+                        </div>
+                    ";
+                }
+            ?>
             <h3>Candidate Management</h3>
             <form action="" class="pb-10">
                 <input type="text" class="form-control" name="search" id="search">
@@ -39,26 +80,46 @@ require_once '../../db.php';
                             <th>Middle Name</th>
                             <th>Last Name</th>
                             <th>Position</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Freakseid</td>
-                            <td>Grauga</td>
-                            <td>Mamuchino</td>
-                            <td>President</td>
-                            <td>
-                                <div class="flex flex-row">
-                                    <button class="btn text-xs action-btn hover-purple"
-                                        onclick="window.location.href='edit.php?candID=1'"
-                                        >Edit</button>
-                                    <button class="btn text-xs action-btn hover-red">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                        </tr>
+                        <?php 
+                            while($row = $result->fetch_assoc()) {
+                                $sql = "
+                                    SELECT p.posName
+                                    FROM Positions p
+                                    WHERE p.posID = '$row[posID]'
+                                ";
+                                $posResult = $connection->query($sql);
+                                $posRowDisplay = '';
+                                while($posRow = $posResult->fetch_assoc()) {
+                                    $posRowDisplay = $posRow['posName'];
+                                }
+                                $positionDisplay  = $posRowDisplay;
+                                echo "
+                                    <tr>
+                                        <td>$row[candID]</td>
+                                        <td>$row[candFName]</td>
+                                        <td>$row[candMName]</td>
+                                        <td>$row[candLName]</td>
+                                        <td>$positionDisplay</td>
+                                        <td>$row[candStat]</td>
+                                        <td>
+                                            <div class='flex flex-row'>
+                                                <button class='btn text-xs action-btn hover-purple'
+                                                    onclick='window.location.href=`edit.php?candID=$row[candID]`'
+                                                    >Edit</button>
+                                                <button class='btn text-xs action-btn hover-red'
+                                                    onclick='window.location.href=`delete.php?candID=$row[candID]`'
+                                                    >Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ";
+                            }
+                        ?>
                     </tbody>
                 </table>
             </div>
