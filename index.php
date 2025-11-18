@@ -38,6 +38,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 			break;
 		}
 
+		if($currentRow['voterStat'] != 'Active') {
+			$message = "Account is disabled. Please contact staff";
+			break;
+		}
+
 		$message = 'Login successful';
 		header("Location: votation/view.php?voterID=$voterID");
 		die();

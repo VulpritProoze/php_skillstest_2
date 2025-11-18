@@ -14,8 +14,6 @@ $sql = "
 
 $posResults = $connection->query($sql);
 
-
-
 ?>
 
 <!DOCTYPE html>
@@ -52,7 +50,7 @@ $posResults = $connection->query($sql);
                         while($row = $posResults->fetch_assoc()) {
                             echo "
                                 <li>
-                                    <a href='vote.php?posID=$row[posID]'>$row[posName] ($row[numOfPositions])</a>
+                                    <a href='vote.php?posID=$row[posID]&voterID=$params_id'>$row[posName] ($row[numOfPositions])</a>
                                 </li>
                             ";
                         }
